@@ -1,0 +1,4 @@
+/build
+*.make
+*.cmake
+*.o
