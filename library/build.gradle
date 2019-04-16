@@ -10,7 +10,8 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-                cppFlags ""
+                cFlags "-ffunction-sections -fdata-sections"
+                targets "aesgcm"
             }
         }
     }
@@ -25,7 +26,6 @@ android {
             path "src/main/cpp/CMakeLists.txt"
         }
     }
-
 }
 
 dependencies {
