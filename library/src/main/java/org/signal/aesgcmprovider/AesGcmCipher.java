@@ -193,7 +193,7 @@ public class AesGcmCipher extends CipherSpi {
   protected int engineDoFinal(byte[] input, int inputOffset, int inputLen, byte[] output, int outputOffset) throws BadPaddingException, IllegalBlockSizeException, ShortBufferException {
     byte[] allocatedOutput = engineDoFinal(input, inputOffset, inputLen);
 
-    if (allocatedOutput.length < output.length - outputOffset) {
+    if (allocatedOutput.length > output.length - outputOffset) {
       throw new ShortBufferException("Needed: " + allocatedOutput.length + " but provided: " + (output.length - outputOffset));
     }
 

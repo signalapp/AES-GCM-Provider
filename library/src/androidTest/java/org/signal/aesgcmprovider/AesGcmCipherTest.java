@@ -218,6 +218,49 @@ public class AesGcmCipherTest {
     }
   }
 
+  @Test
+  public void testEncryptDecryptIncremental() throws Exception {
+    Cipher encryptCipher = Cipher.getInstance("AES/GCM/NoPadding");
+
+    byte[] key = new byte[32];
+    new SecureRandom().nextBytes(key);
+
+    byte[] iv = new byte[12];
+
+    encryptCipher.init(Cipher.ENCRYPT_MODE,
+                       new SecretKeySpec(key, "AES"),
+                       new GCMParameterSpec(128, iv));
+
+    byte[] original = new byte[128];
+    Arrays.fill(original, (byte)0x0a);
+
+    byte[] ciphertext       = new byte[encryptCipher.getOutputSize(original.length)];
+    int    ciphertextLength = encryptCipher.update(original, 0, original.length, ciphertext, 0);
+    ciphertextLength       += encryptCipher.doFinal(ciphertext, ciphertextLength);
+
+    assertEquals(original.length + 16, ciphertextLength);
+
+    assertArrayEquals(encryptCipher.getIV(), iv);
+
+    Cipher decryptCipher = Cipher.getInstance("AES/GCM/NoPadding");
+    decryptCipher.init(Cipher.DECRYPT_MODE,
+                       new SecretKeySpec(key, "AES"),
+                       new GCMParameterSpec(128, iv));
+
+    assertArrayEquals(decryptCipher.getIV(), iv);
+
+    byte[] plaintext       = new byte[decryptCipher.getOutputSize(ciphertextLength)];
+    int    plaintextLength = decryptCipher.update(ciphertext, 0, ciphertextLength, plaintext, 0);
+    plaintextLength       += decryptCipher.doFinal(plaintext, plaintextLength);
+
+    assertEquals(original.length, plaintextLength);
+
+    for (int i=0;i<plaintextLength;i++) {
+      assertEquals(original[i], plaintext[i]);
+    }
+  }
+
+
 
   @Test
   public void testVectors() throws Exception {
