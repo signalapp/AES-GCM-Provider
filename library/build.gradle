@@ -10,6 +10,7 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
+                arguments "-DANDROID_STL=none"
                 cFlags "-ffunction-sections -fdata-sections"
                 targets "aesgcm"
             }

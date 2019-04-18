@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.4.1)
 
 add_subdirectory(third_party/boringssl/src/)
 
-add_library(aesgcm SHARED AesGcmCipher.cpp)
+add_library(aesgcm SHARED AesGcmCipher.c)
 
 target_include_directories(aesgcm PUBLIC third_party/boringssl/src/include/)
 
