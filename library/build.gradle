@@ -1,4 +1,10 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+archivesBaseName = "aesgcmprovider"
+version          = "0.0.1"
+group            = "org.signal"
 
 android {
     compileSdkVersion 26
@@ -35,3 +41,74 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     androidTestImplementation 'org.mockito:mockito-android:2.7.22'
 }
+
+def isReleaseBuild() {
+    return version.contains("SNAPSHOT") == false
+}
+
+def getReleaseRepositoryUrl() {
+    return hasProperty('sonatypeRepo') ? sonatypeRepo
+            : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+}
+
+def getRepositoryUsername() {
+    return hasProperty('whisperSonatypeUsername') ? whisperSonatypeUsername : ""
+}
+
+def getRepositoryPassword() {
+    return hasProperty('whisperSonatypePassword') ? whisperSonatypePassword : ""
+}
+
+signing {
+    required { isReleaseBuild() && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+uploadArchives {
+    configuration = configurations.archives
+    repositories.mavenDeployer {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+        repository(url: getReleaseRepositoryUrl()) {
+            authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+        }
+
+        pom.project {
+            name 'aesgcmprovider'
+            packaging 'aar'
+            description 'A BoringSSL-backed AES-GCM provider for Android'
+            url 'https://github.com/signalapp/AES-GCM-Provider'
+
+            scm {
+                url 'scm:git@github.com:signalapp/AES-GCM-Provider.git'
+                connection 'scm:git@github.com:signalapp/AES-GCM-Provider.git'
+                developerConnection 'scm:git@github.com:signalapp/AES-GCM-Provider.git'
+            }
+
+            licenses {
+                license {
+                    name 'AGPLv3'
+                    url 'https://www.gnu.org/licenses/agpl-3.0.html'
+                    distribution 'repo'
+                }
+            }
+
+            developers {
+                developer {
+                    name 'Moxie Marlinspike'
+                }
+            }
+        }
+    }
+}
+
+task installArchives(type: Upload) {
+    description "Installs the artifacts to the local Maven repository."
+    configuration = configurations['archives']
+    repositories {
+        mavenDeployer {
+            repository url: "file://${System.properties['user.home']}/.m2/repository"
+        }
+    }
+}
+
