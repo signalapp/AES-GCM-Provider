@@ -171,6 +171,42 @@ public class AesGcmCipherTest {
   }
 
   @Test
+  public void testEncryptDecryptWithBadCiphertext() throws Exception {
+    Cipher encryptCipher = Cipher.getInstance("AES/GCM/NoPadding");
+
+    byte[] key = new byte[32];
+    new SecureRandom().nextBytes(key);
+
+    byte[] iv = new byte[12];
+    new SecureRandom().nextBytes(iv);
+
+    encryptCipher.init(Cipher.ENCRYPT_MODE,
+                       new SecretKeySpec(key, "AES"),
+                       new GCMParameterSpec(128, iv));
+
+    byte[] original = new byte[128];
+    Arrays.fill(original, (byte)0x0a);
+
+    byte[] ciphertext = encryptCipher.doFinal(original);
+    assertEquals(original.length + 16, ciphertext.length);
+
+    Cipher decryptCipher = Cipher.getInstance("AES/GCM/NoPadding");
+    decryptCipher.init(Cipher.DECRYPT_MODE,
+                       new SecretKeySpec(key, "AES"),
+                       new GCMParameterSpec(128, iv));
+
+    ciphertext[0] ^= 0x01;
+
+    try {
+      decryptCipher.doFinal(ciphertext);
+      throw new AssertionError("Should have failed");
+    } catch (BadPaddingException e) {
+      // good
+    }
+  }
+
+
+  @Test
   public void testVectors() throws Exception {
     for (String vector : VECTORS) {
       String[] parts      = vector.split(":");
@@ -281,7 +317,6 @@ public class AesGcmCipherTest {
         plaintextOutputStream.write(decryptCipher.doFinal());
 
         assertArrayEquals(plaintext, plaintextOutputStream.toByteArray());
-        Log.w("AesGcmcipherTest", "Passed: " + i);
       }
     }
   }
