@@ -3,7 +3,7 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 archivesBaseName = "aesgcmprovider"
-version          = "0.0.2"
+version          = "0.0.3"
 group            = "org.signal"
 
 android {
