@@ -102,6 +102,9 @@ public class AesGcmCipher extends CipherSpi {
 
   @Override
   protected void engineInit(int opmode, Key key, AlgorithmParameterSpec params, SecureRandom random) throws InvalidAlgorithmParameterException, InvalidKeyException {
+    if(key == null){
+      throw new InvalidAlgorithmParameterException("Got null instead of Key");
+    }
     if (params == null && opmode == Cipher.DECRYPT_MODE) {
       throw new InvalidAlgorithmParameterException("Required GCMParameterSpec for decryption");
     } else if (params == null) {
