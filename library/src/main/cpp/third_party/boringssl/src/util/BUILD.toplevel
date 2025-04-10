@@ -67,7 +67,6 @@ posix_copts = [
 
     # This list of warnings should match those in the top-level CMakeLists.txt.
     "-Wall",
-    "-Werror",
     "-Wformat=2",
     "-Wsign-compare",
     "-Wmissing-field-initializers",
